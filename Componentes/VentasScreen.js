@@ -19,7 +19,6 @@ const VentasScreen = () => {
   const [totalGanancia, setTotalGanancia] = useState(0);
   const [fechaFiltro, setFechaFiltro] = useState(new Date());
   const [isCobrando, setIsCobrando] = useState(false);
-  const [mostrarPicker, setMostrarPicker] = useState(false);
 
   // Cargar pedidos en estado "Finalizado"
   useEffect(() => {
@@ -54,7 +53,7 @@ const VentasScreen = () => {
     setTotalGanancia(total);
   }, [ventas, fechaFiltro]);
 
-  // Función para cobrar un pedido
+  // Función para cobrar un pedido con animación
   const cobrarPedido = async (pedido) => {
     Alert.alert(
       "Confirmar Cobro",
@@ -65,26 +64,29 @@ const VentasScreen = () => {
           text: "Cobrar",
           onPress: async () => {
             setIsCobrando(true); // Mostrar animación
-            try {
-              // Actualizar el estado del pedido a "Entregado"
-              await updateDoc(doc(db, "pedidos", pedido.id), { estado: "Entregado" });
 
-              // Guardar el pedido en la colección "ventas"
-              await addDoc(collection(db, "ventas"), {
-                producto: `Pedido de ${pedido.cliente}`,
-                cantidad: 1,
-                precioVenta: pedido.precioTotal,
-                fechaVenta: new Date(),
-                detalle: pedido.detalles,
-              });
+            setTimeout(async () => {
+              try {
+                // Actualizar el estado del pedido a "Entregado"
+                await updateDoc(doc(db, "pedidos", pedido.id), { estado: "Entregado" });
 
-              setIsCobrando(false); // Ocultar animación
-              Alert.alert("Éxito", "Pedido cobrado exitosamente.");
-            } catch (error) {
-              setIsCobrando(false); // Ocultar animación
-              console.error("Error al cobrar el pedido:", error);
-              Alert.alert("Error", "No se pudo cobrar el pedido.");
-            }
+                // Guardar el pedido en la colección "ventas"
+                await addDoc(collection(db, "ventas"), {
+                  producto: `Pedido de ${pedido.cliente}`,
+                  cantidad: 1,
+                  precioVenta: pedido.precioTotal,
+                  fechaVenta: new Date(),
+                  detalle: pedido.detalles,
+                });
+
+                setIsCobrando(false); // Ocultar animación
+                Alert.alert("Éxito", "Pedido cobrado exitosamente.");
+              } catch (error) {
+                setIsCobrando(false); // Ocultar animación
+                console.error("Error al cobrar el pedido:", error);
+                Alert.alert("Error", "No se pudo cobrar el pedido.");
+              }
+            }, 2000); // 2 segundos de delay
           },
         },
       ]
@@ -149,17 +151,6 @@ const VentasScreen = () => {
           <Text style={styles.changeDateText}>Cambiar Fecha</Text>
         </TouchableOpacity>
       </View>
-      {mostrarPicker && (
-        <DateTimePicker
-          value={fechaFiltro}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setMostrarPicker(false); // Ocultar el selector
-            if (selectedDate) setFechaFiltro(selectedDate);
-          }}
-        />
-      )}
       <FlatList
         data={pedidos}
         keyExtractor={(item) => item.id}
@@ -261,7 +252,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffe4e1",
   },
   animation: {
-    width: 200,
-    height: 200,
+    width: 300, // Tamaño grande
+    height: 300,
   },
 });
