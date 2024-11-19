@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import LottieView from "lottie-react-native";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../conexion/firebaseConfig";
@@ -68,6 +68,11 @@ export default function IniciarSesionScreen({ navigation }) {
       )}
       {!isAccessDenied && !isAccessGranted && (
         <View style={styles.formContainer}>
+          {/* Logo de la app */}
+          <Image
+            source={require("../assets/pasteleria_logo.png")}
+            style={styles.logo}
+          />
           <Text style={styles.title}>Iniciar Sesión</Text>
           <TextInput
             style={styles.input}
@@ -112,6 +117,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     alignItems: "center",
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20, // Espacio debajo del logo
   },
   title: {
     fontSize: 24,
