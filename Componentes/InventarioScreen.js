@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity, Image, Alert, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
-import { db } from "/Users/waska/OneDrive/Escritorio/claseProfeYesenia/individual/Pasteleria/conexion/firebaseConfig"; 
+import { db } from "../conexion/firebaseConfig"; // Ajusta la ruta según corresponda
+
 const InventarioScreen = ({ navigation }) => {
   const [ingredientes, setIngredientes] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "ingredientes"), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db, "inventario"), (snapshot) => {
       const ingredientesList = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -25,7 +26,7 @@ const InventarioScreen = ({ navigation }) => {
         text: "Eliminar",
         style: "destructive",
         onPress: async () => {
-          await deleteDoc(doc(db, "ingredientes", id));
+          await deleteDoc(doc(db, "inventario", id));
         },
       },
     ]);
@@ -34,13 +35,18 @@ const InventarioScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Image
-        source={item.imagenIngrediente ? { uri: `data:image/png;base64,${item.imagenIngrediente}` } : null}
+        source={
+          item.imagenBase64
+            ? { uri: `data:image/png;base64,${item.imagenBase64}` }
+            : require("../assets/default-image.png") // Imagen por defecto
+        }
         style={styles.image}
       />
       <View style={styles.info}>
         <Text style={styles.name}>{item.nombreIngrediente}</Text>
         <Text>Cantidad: {item.cantidadDisponible}</Text>
-        <Text>Costo por unidad: C$ {item.costoUnidad.toFixed(2)}</Text>
+        <Text>Costo Unidad: C$ {item.costoUnidad.toFixed(2)}</Text>
+        <Text>Actualizado: {new Date(item.fechaActualizacion.seconds * 1000).toLocaleDateString()}</Text>
       </View>
       <View style={styles.actions}>
         <TouchableOpacity
