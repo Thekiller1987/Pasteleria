@@ -19,6 +19,7 @@ const VentasScreen = () => {
   const [totalGanancia, setTotalGanancia] = useState(0);
   const [fechaFiltro, setFechaFiltro] = useState(new Date());
   const [isCobrando, setIsCobrando] = useState(false);
+  const [mostrarPicker, setMostrarPicker] = useState(false); // Agregado para manejar el picker
 
   // Cargar pedidos en estado "Finalizado"
   useEffect(() => {
@@ -146,11 +147,24 @@ const VentasScreen = () => {
         <Text>Fecha seleccionada: {fechaFiltro.toLocaleDateString()}</Text>
         <TouchableOpacity
           style={styles.changeDateButton}
-          onPress={() => setMostrarPicker(true)}
+          onPress={() => setMostrarPicker(true)} // Abre el picker al presionar el botón
         >
           <Text style={styles.changeDateText}>Cambiar Fecha</Text>
         </TouchableOpacity>
       </View>
+      {mostrarPicker && (
+        <DateTimePicker
+          value={fechaFiltro}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setMostrarPicker(false); // Cierra el picker
+            if (selectedDate) {
+              setFechaFiltro(selectedDate); // Actualiza la fecha seleccionada
+            }
+          }}
+        />
+      )}
       <FlatList
         data={pedidos}
         keyExtractor={(item) => item.id}
@@ -252,7 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffe4e1",
   },
   animation: {
-    width: 300, // Tamaño grande
+    width: 300, // Tamaño grande animacion
     height: 300,
   },
 });

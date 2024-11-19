@@ -80,12 +80,12 @@ export default function App() {
           options={{ title: "Editar Ingrediente" }}
         />
         <Stack.Screen
-          name="AgregarPedido"
+          name="AgregarPedidoScreen"
           component={AgregarPedidoScreen}
           options={{ title: "Agregar Pedido" }}
         />
         <Stack.Screen
-          name="EditarPedido"
+          name="EditarPedidoScreen"
           component={EditarPedidoScreen}
           options={{ title: "Editar Pedido" }}
         />
