@@ -4,8 +4,8 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { collection, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
@@ -79,12 +79,30 @@ const PedidosScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Pedidos En Proceso</Text>
       <FlatList
-        data={pedidos}
+        data={pedidos.filter((pedido) => pedido.estado === 'En proceso')}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.empty}>No hay pedidos registrados</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>No hay pedidos en proceso</Text>}
       />
+
+      <Text style={styles.sectionTitle}>Pedidos Finalizados</Text>
+      <FlatList
+        data={pedidos.filter((pedido) => pedido.estado === 'Finalizado')}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListEmptyComponent={<Text style={styles.empty}>No hay pedidos finalizados</Text>}
+      />
+
+      <Text style={styles.sectionTitle}>Pedidos Entregados</Text>
+      <FlatList
+        data={pedidos.filter((pedido) => pedido.estado === 'Entregado')}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListEmptyComponent={<Text style={styles.empty}>No hay pedidos entregados</Text>}
+      />
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate('AgregarPedidoScreen')}
@@ -98,19 +116,25 @@ const PedidosScreen = ({ navigation }) => {
 export default PedidosScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffe4e1' },
+  container: { flex: 1, backgroundColor: '#ffe4e1', paddingHorizontal: 10 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4a4a4a',
+    marginVertical: 10,
+    textAlign: 'center',
+  },
   card: {
     flexDirection: 'row',
     padding: 10,
     marginVertical: 8,
-    marginHorizontal: 16,
     backgroundColor: 'white',
     borderRadius: 8,
     elevation: 2,
   },
-  info: { flex: 1, justifyContent: 'center' },
+  info: { flex: 1 },
   name: { fontSize: 16, fontWeight: 'bold' },
-  actions: { justifyContent: 'space-between', alignItems: 'center' },
+  actions: { justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' },
   addButton: {
     position: 'absolute',
     bottom: 20,
@@ -123,7 +147,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
   },
-  empty: { textAlign: 'center', marginTop: 20, fontSize: 16, color: 'gray' },
+  empty: { textAlign: 'center', marginTop: 10, fontSize: 14, color: 'gray' },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
