@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Text, Image } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Text,
+  Image,
+  ScrollView,
+} from 'react-native';
+import LottieView from 'lottie-react-native';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../conexion/firebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,6 +21,7 @@ const EditarIngredienteScreen = ({ route, navigation }) => {
   const [cantidadDisponible, setCantidadDisponible] = useState('');
   const [costoUnidad, setCostoUnidad] = useState('');
   const [imagenBase64, setImagenBase64] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchIngrediente = async () => {
@@ -28,7 +40,10 @@ const EditarIngredienteScreen = ({ route, navigation }) => {
     const solicitarPermisos = async () => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permiso denegado', 'Se requiere acceso a la galería para seleccionar imágenes.');
+        Alert.alert(
+          'Permiso denegado',
+          'Se requiere acceso a la galería para seleccionar imágenes.'
+        );
       }
     };
 
@@ -61,6 +76,8 @@ const EditarIngredienteScreen = ({ route, navigation }) => {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       const docRef = doc(db, 'inventario', id);
       await updateDoc(docRef, {
@@ -70,16 +87,34 @@ const EditarIngredienteScreen = ({ route, navigation }) => {
         imagenBase64: imagenBase64 || '',
         fechaActualizacion: new Date(),
       });
-      Alert.alert('Éxito', 'Ingrediente actualizado correctamente');
-      navigation.goBack();
+      setTimeout(() => {
+        setIsLoading(false);
+        Alert.alert('Éxito', 'Ingrediente actualizado correctamente');
+        navigation.goBack();
+      }, 2000);
     } catch (error) {
+      setIsLoading(false);
       Alert.alert('Error', 'No se pudo actualizar el ingrediente');
       console.error('Error al actualizar ingrediente:', error);
     }
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <LottieView
+          source={require('../animaciones/pastelcargando.json')}
+          autoPlay
+          loop
+          style={styles.animation}
+        />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Editar Ingrediente</Text>
       <TextInput
         style={styles.input}
         placeholder="Nombre del Ingrediente"
@@ -109,37 +144,78 @@ const EditarIngredienteScreen = ({ route, navigation }) => {
           style={styles.imagePreview}
         />
       ) : null}
-      <Button title="Actualizar Ingrediente" onPress={actualizarIngrediente} />
-    </View>
+      <TouchableOpacity style={styles.updateButton} onPress={actualizarIngrediente}>
+        <Text style={styles.updateButtonText}>Actualizar Ingrediente</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
-export default EditarIngredienteScreen;
-
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#FFF0F5',
+    alignItems: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFF0F5',
+  },
+  animation: {
+    width: 300,
+    height: 300,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#C71585',
+    marginBottom: 20,
+  },
   input: {
+    width: '100%',
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#C71585',
     padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+    marginBottom: 15,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
   },
   imageButton: {
-    backgroundColor: '#4caf50',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: '#FF69B4',
+    padding: 12,
+    borderRadius: 10,
     marginVertical: 10,
     alignItems: 'center',
+    width: '100%',
   },
   imageButtonText: {
     color: 'white',
     fontWeight: 'bold',
   },
   imagePreview: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
     marginVertical: 10,
+    borderRadius: 75,
+    borderWidth: 2,
+    borderColor: '#C71585',
+  },
+  updateButton: {
+    backgroundColor: '#C71585',
+    padding: 15,
     borderRadius: 10,
+    marginTop: 20,
+    alignItems: 'center',
+    width: '100%',
+  },
+  updateButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
+
+export default EditarIngredienteScreen;
